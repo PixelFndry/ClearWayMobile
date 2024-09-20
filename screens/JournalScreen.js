@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
 import { collection, addDoc, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import { auth } from '../firebase';
 import { Picker } from '@react-native-picker/picker';
 
 const JournalScreen = () => {
