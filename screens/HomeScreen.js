@@ -10,6 +10,10 @@ const HomeScreen = ({ navigation }) => {
   const [goalDays, setGoalDays] = useState(null);
   const [goalSet, setGoalSet] = useState(false);
   const [goalMet, setGoalMet] = useState(false);
+  const [drinkAmount, setDrinkAmount] = useState('');
+  const [feeling, setFeeling] = useState(null);
+  const [checkInStage, setCheckInStage] = useState('initial'); // 'initial', 'amount', 'feeling', 'completed'
+  const [drankYesterday, setDrankYesterday] = useState(null);
 
   useEffect(() => {
     // Check if a new day has started since the last check-in
@@ -57,15 +61,83 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const handleCheckInResponse = async (response) => {
-    let newDaysClear = response === 'no' ? daysClear + 1 : 0;
+  const handleCheckInResponse = (response) => {
+    setDrankYesterday(response === 'yes');
+    if (response === 'yes') {
+      setCheckInStage('amount');
+    } else {
+      handleNoDrink();
+    }
+  };
+
+  const handleNoDrink = async () => {
+    let newDaysClear = daysClear + 1;
     setDaysClear(newDaysClear);
     try {
       await AsyncStorage.setItem('daysClear', newDaysClear.toString());
     } catch (error) {
       console.error('Error saving days clear:', error);
     }
-    setCheckInCompleted(true);
+    setCheckInStage('completed');
+    await saveJournalEntry();  // Save the journal entry after completing check-in
+  };
+
+  const handleDrinkAmount = () => {
+    if (drinkAmount !== '') {
+      setCheckInStage('feeling');
+    }
+  };
+
+  const handleFeeling = async (feelingValue) => {
+    setFeeling(feelingValue);
+    setDaysClear(0);
+    try {
+      await AsyncStorage.setItem('daysClear', '0');
+    } catch (error) {
+      console.error('Error resetting days clear:', error);
+    }
+    setCheckInStage('completed');
+    await saveJournalEntry();  // Save the journal entry after completing check-in
+  };
+
+  const renderFeelingOptions = () => {
+    const options = [
+      { emoji: '😫', text: 'Awful' },
+      { emoji: '😕', text: 'Not Great' },
+      { emoji: '😐', text: 'Okay' },
+      { emoji: '🙂', text: 'Good' },
+      { emoji: '😄', text: 'Fantastic' },
+    ];
+
+    return options.map((option, index) => (
+      <TouchableOpacity
+        key={index}
+        style={styles.feelingButton}
+        onPress={() => handleFeeling(option.text)}
+      >
+        <Text style={styles.feelingEmoji}>{option.emoji}</Text>
+        <Text style={styles.feelingText}>{option.text}</Text>
+      </TouchableOpacity>
+    ));
+  };
+
+  const saveJournalEntry = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry = {
+      date: today,
+      drank: drankYesterday,
+      amount: drankYesterday ? parseInt(drinkAmount, 10) : 0,
+      feeling: feeling,
+    };
+
+    try {
+      const existingEntries = await AsyncStorage.getItem('journalEntries');
+      let entries = existingEntries ? JSON.parse(existingEntries) : [];
+      entries.unshift(newEntry);  // Add new entry to the beginning of the array
+      await AsyncStorage.setItem('journalEntries', JSON.stringify(entries));
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+    }
   };
 
   return (
@@ -75,7 +147,7 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.dailyCheckInTitle}>
             <Ionicons name="calendar-outline" size={24} color="#eee939" /> Daily Check-in
           </Text>
-          {!checkInCompleted ? (
+          {checkInStage === 'initial' && (
             <>
               <Text style={styles.checkInQuestion}>Did you drink yesterday?</Text>
               <View style={styles.responseButtons}>
@@ -93,7 +165,34 @@ const HomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </>
-          ) : (
+          )}
+          {checkInStage === 'amount' && (
+            <>
+              <Text style={styles.checkInQuestion}>How many drinks did you have?</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={drinkAmount}
+                onChangeText={setDrinkAmount}
+                placeholder="Enter number of drinks"
+              />
+              <TouchableOpacity 
+                style={[styles.responseButton, styles.amountButton]} 
+                onPress={handleDrinkAmount}
+              >
+                <Text style={styles.responseButtonText}>Next</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          {checkInStage === 'feeling' && (
+            <>
+              <Text style={styles.checkInQuestion}>How are you feeling today?</Text>
+              <View style={styles.feelingButtons}>
+                {renderFeelingOptions()}
+              </View>
+            </>
+          )}
+          {checkInStage === 'completed' && (
             <Text style={styles.completedText}>Great job completing your daily check-in!</Text>
           )}
         </View>
@@ -150,8 +249,8 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <Text style={styles.sectionTitle}>Journal</Text>
           <Text style={styles.sectionText}>Record your thoughts and feelings on your ClearWay journey.</Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Open Journal</Text>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Journal')}>
+            <Text style={styles.buttonText}>View Journal</Text>
           </TouchableOpacity>
         </View>
 
@@ -353,6 +452,34 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+  },
+  amountButton: {
+    backgroundColor: '#4380b4',
+    marginVertical: 5,
+  },
+  feelingButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  feelingButton: {
+    alignItems: 'center',
+    margin: 10,
+  },
+  feelingEmoji: {
+    fontSize: 30,
+    marginBottom: 5,
+  },
+  feelingText: {
+    color: '#183e5e',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#4380b4',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    fontSize: 16,
   },
 });
 

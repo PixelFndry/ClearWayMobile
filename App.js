@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import JournalScreen from './screens/JournalScreen';
 import { useFonts, Roboto_100Thin } from '@expo-google-fonts/roboto';
 
 const Stack = createStackNavigator();
@@ -21,6 +22,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Journal" component={JournalScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
