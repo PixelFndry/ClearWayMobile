@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Tex
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
+import { Linking, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = ({ navigation }) => {
   const [checkInCompleted, setCheckInCompleted] = useState(false);
@@ -163,11 +165,47 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
+  const openGrandMountainAdventure = async () => {
+    // Deep link URL for Grand Mountain Adventure (this is hypothetical and needs to be confirmed with the game developers)
+    const deepLink = 'grandmountainadventure://';
+    
+    // App Store URL for iOS
+    const appStoreUrl = 'https://apps.apple.com/us/app/grand-mountain-adventure/id1479711540';
+    
+    // Google Play Store URL for Android
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.toppluva.grandmountain';
+
+    // Check if the app is installed
+    const supported = await Linking.canOpenURL(deepLink);
+
+    if (supported) {
+      // Open the app
+      await Linking.openURL(deepLink);
+    } else {
+      // If the app is not installed, open the appropriate store
+      if (Platform.OS === 'ios') {
+        Linking.openURL(appStoreUrl);
+      } else {
+        Linking.openURL(playStoreUrl);
+      }
+    }
+  };
+
   const handleActivityPress = (activity) => {
-    if (activity === 'Listen to Music') {
+    if (activity === 'Play a Game') {
+      openGrandMountainAdventure();
+    } else if (activity === 'Listen to Music') {
       setIsSpotifyModalVisible(true);
+    } else if (activity === 'Quick Chat') {
+      navigation.navigate('AIChat');
     }
     // Handle other activities here
+  };
+
+  const handleLiveSupportPress = () => {
+    // Implement the action for speaking to live support
+    console.log("Speak to Live Support pressed");
+    // You might want to navigate to a new screen or open a chat interface
   };
 
   return (
@@ -230,6 +268,13 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.urgeSection}>
           <Text style={styles.urgeSectionTitle}>Feeling an Urge?</Text>
           <Text style={styles.urgeSectionSubtitle}>Try one of these activities to help you through it:</Text>
+          
+          <TouchableOpacity 
+            style={styles.liveSupportButton}
+            onPress={handleLiveSupportPress}
+          >
+            <Text style={styles.liveSupportButtonText}>Speak to Live Support</Text>
+          </TouchableOpacity>
           
           <View style={styles.activitiesGrid}>
             {['Play a Game', 'Listen to Music', 'Watch Inspiration', 'Quick Exercise', 'Mindful Break', 'Quick Chat'].map((activity, index) => (
@@ -550,6 +595,19 @@ const styles = StyleSheet.create({
   closeButton: {
     alignSelf: 'flex-end',
     marginBottom: 10,
+  },
+  liveSupportButton: {
+    backgroundColor: '#4380b4',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+    width: '100%',
+  },
+  liveSupportButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

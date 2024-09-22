@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
+import AIChatScreen from './screens/AIChatScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import JournalScreen from './screens/JournalScreen';
 import { useFonts, Roboto_100Thin } from '@expo-google-fonts/roboto';
@@ -21,6 +22,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'AI Counselor' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Journal" component={JournalScreen} />
       </Stack.Navigator>
