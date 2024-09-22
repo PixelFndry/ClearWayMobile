@@ -4,12 +4,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 
+// ErrorBoundary component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <Text>Something went wrong with the chart.</Text>;
+    }
+
+    return this.props.children;
+  }
+}
+
 const JournalScreen = () => {
   const [journalEntries, setJournalEntries] = useState([]);
   const [timeRange, setTimeRange] = useState(7); // Default to 7 days
 
   useEffect(() => {
     loadJournalEntries();
+    console.log('Journal Entries:', journalEntries);
   }, []);
 
   const loadJournalEntries = async () => {
@@ -23,14 +48,14 @@ const JournalScreen = () => {
     }
   };
 
-  const getFeelingIcon = (feeling) => {
+  const getFeelingEmoji = (feeling) => {
     switch (feeling) {
-      case 'Awful': return 'sad-outline';
-      case 'Not Great': return 'frown-outline';
-      case 'Okay': return 'happy-outline';
-      case 'Good': return 'smile-outline';
-      case 'Fantastic': return 'sunny-outline';
-      default: return 'help-outline';
+      case 'Awful': return '😢';
+      case 'Not Great': return '😕';
+      case 'Okay': return '😐';
+      case 'Good': return '😊';
+      case 'Fantastic': return '😃';
+      default: return '❓';
     }
   };
 
@@ -42,44 +67,71 @@ const JournalScreen = () => {
       </View>
       <View style={styles.detailsContainer}>
         <View style={styles.drinkStatus}>
-          <Ionicons name={item.drank ? "wine-outline" : "water-outline"} size={24} color={item.drank ? "#e74c3c" : "#2ecc71"} />
-          <Text style={[styles.entryText, { color: item.drank ? "#e74c3c" : "#2ecc71" }]}>
-            {item.drank ? `Drank ${item.amount} drinks` : "Didn't drink"}
+          <Ionicons name={item.amount > 0 ? "wine-outline" : "water-outline"} size={24} color={item.amount > 0 ? "#e74c3c" : "#2ecc71"} />
+          <Text style={[styles.entryText, { color: item.amount > 0 ? "#e74c3c" : "#2ecc71" }]}>
+            {item.amount > 0 ? `Drank ${item.amount} drinks` : "Didn't drink"}
           </Text>
         </View>
-        {item.drank && (
-          <View style={styles.feelingContainer}>
-            <Ionicons name={getFeelingIcon(item.feeling)} size={24} color="#4380b4" />
-            <Text style={styles.entryText}>Feeling: {item.feeling}</Text>
-          </View>
-        )}
+        <View style={styles.feelingContainer}>
+          <Text style={styles.feelingEmoji}>{getFeelingEmoji(item.feeling)}</Text>
+          <Text style={styles.entryText}>Feeling: {item.feeling || 'Not specified'}</Text>
+        </View>
       </View>
     </View>
   );
 
   const getChartData = () => {
+    console.log('Raw journal entries:', journalEntries);
+
     const sortedEntries = [...journalEntries].sort((a, b) => new Date(a.date) - new Date(b.date));
     const recentEntries = sortedEntries.slice(-timeRange);
     
+    console.log('Recent entries:', recentEntries);
+
+    const validEntries = recentEntries.filter(entry => entry.date);
+
+    console.log('Valid entries:', validEntries);
+
+    if (validEntries.length === 0) {
+      return {
+        labels: ['No Data'],
+        datasets: [{ data: [0] }, { data: [0] }]
+      };
+    }
+
+    const labels = validEntries.map(entry => {
+      const date = new Date(entry.date);
+      return `${date.getMonth() + 1}-${date.getDate()}`;
+    });
+
+    const maxDrinks = Math.max(...validEntries.map(entry => parseFloat(entry.amount) || 0));
+
+    const drinkData = validEntries.map(entry => {
+      const amount = parseFloat(entry.amount);
+      return isNaN(amount) ? 0 : amount;
+    });
+
+    const feelingData = validEntries.map(entry => {
+      switch(entry.feeling) {
+        case 'Awful': return maxDrinks * 0.2;
+        case 'Not Great': return maxDrinks * 0.4;
+        case 'Okay': return maxDrinks * 0.6;
+        case 'Good': return maxDrinks * 0.8;
+        case 'Fantastic': return maxDrinks;
+        default: return 0;
+      }
+    });
+
     return {
-      labels: recentEntries.map(entry => entry.date.slice(5)), // MM-DD format
+      labels,
       datasets: [
         {
-          data: recentEntries.map(entry => entry.amount || 0),
+          data: drinkData,
           color: (opacity = 1) => `rgba(231, 76, 60, ${opacity})`, // Red for drinks
           strokeWidth: 2
         },
         {
-          data: recentEntries.map(entry => {
-            switch(entry.feeling) {
-              case 'Awful': return 1;
-              case 'Not Great': return 2;
-              case 'Okay': return 3;
-              case 'Good': return 4;
-              case 'Fantastic': return 5;
-              default: return 0;
-            }
-          }),
+          data: feelingData,
           color: (opacity = 1) => `rgba(52, 152, 219, ${opacity})`, // Blue for feelings
           strokeWidth: 2
         }
@@ -87,53 +139,97 @@ const JournalScreen = () => {
     };
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Journal Entries</Text>
-        <TouchableOpacity onPress={loadJournalEntries} style={styles.refreshButton}>
-          <Ionicons name="refresh-outline" size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
+  const addJournalEntry = async (date, amount, feeling) => {
+    const newEntry = {
+      date,
+      amount: parseFloat(amount),
+      feeling
+    };
 
-      <View style={styles.chartContainer}>
-        <LineChart
-          data={getChartData()}
-          width={Dimensions.get('window').width - 20}
-          height={220}
-          chartConfig={{
-            backgroundColor: '#ffffff',
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: {
-              borderRadius: 16
-            }
-          }}
-          bezier
-          style={styles.chart}
-        />
-        <View style={styles.timeRangeButtons}>
-          <TouchableOpacity onPress={() => setTimeRange(7)} style={[styles.timeRangeButton, timeRange === 7 && styles.activeTimeRange]}>
-            <Text style={styles.timeRangeText}>7 Days</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setTimeRange(30)} style={[styles.timeRangeButton, timeRange === 30 && styles.activeTimeRange]}>
-            <Text style={styles.timeRangeText}>30 Days</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setTimeRange(90)} style={[styles.timeRangeButton, timeRange === 90 && styles.activeTimeRange]}>
-            <Text style={styles.timeRangeText}>90 Days</Text>
+    const updatedEntries = [...journalEntries, newEntry];
+    setJournalEntries(updatedEntries);
+
+    try {
+      await AsyncStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+    }
+  };
+
+  return (
+    <ErrorBoundary>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Journal Entries</Text>
+          <TouchableOpacity onPress={loadJournalEntries} style={styles.refreshButton}>
+            <Ionicons name="refresh-outline" size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
-      </View>
 
-      <FlatList
-        data={journalEntries}
-        renderItem={renderJournalEntry}
-        keyExtractor={(item, index) => `${item.date}-${index}`}
-        contentContainerStyle={styles.listContainer}
-      />
-    </SafeAreaView>
+        {journalEntries.length > 0 ? (
+          <View style={styles.chartContainer}>
+            <ErrorBoundary>
+              <LineChart
+                data={getChartData()}
+                width={Dimensions.get('window').width - 40}
+                height={220}
+                yAxisLabel="🍷"
+                yAxisSuffix=""
+                yAxisInterval={1}
+                chartConfig={{
+                  backgroundColor: '#ffffff',
+                  backgroundGradientFrom: '#ffffff',
+                  backgroundGradientTo: '#ffffff',
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  style: {
+                    borderRadius: 16
+                  },
+                  propsForDots: {
+                    r: "6",
+                    strokeWidth: "2",
+                    stroke: "#ffa726"
+                  },
+                  propsForLabels: {
+                    fontSize: 10,
+                  },
+                }}
+                bezier
+                style={styles.chart}
+                legend={['Drinks', 'Feeling']}
+                fromZero={true}
+                segments={5}
+                formatXLabel={(value) => value.split('-')[1]}
+                renderRightAxis={() => {
+                  const emojis = ['😢', '😕', '😐', '😊', '😃'];
+                  return (
+                    <View style={{position: 'absolute', right: -35, top: 10, bottom: 10, justifyContent: 'space-between'}}>
+                      {emojis.map((emoji, index) => (
+                        <Text key={index} style={{fontSize: 20}}>{emoji}</Text>
+                      ))}
+                    </View>
+                  );
+                }}
+              />
+              <Text style={styles.chartExplanation}>
+                The red line shows the number of drinks, while the blue line indicates how you felt the next day.
+                Higher blue line corresponds to better feelings.
+              </Text>
+            </ErrorBoundary>
+          </View>
+        ) : (
+          <Text style={styles.noDataText}>No journal entries available</Text>
+        )}
+
+        <FlatList
+          data={journalEntries}
+          renderItem={renderJournalEntry}
+          keyExtractor={(item, index) => `${item.date}-${index}`}
+          contentContainerStyle={styles.listContainer}
+        />
+      </SafeAreaView>
+    </ErrorBoundary>
   );
 };
 
@@ -196,6 +292,7 @@ const styles = StyleSheet.create({
   feelingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 5,
   },
   entryText: {
     fontSize: 16,
@@ -227,6 +324,22 @@ const styles = StyleSheet.create({
   timeRangeText: {
     color: '#183e5e',
     fontWeight: 'bold',
+  },
+  feelingEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  noDataText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#666',
+  },
+  chartExplanation: {
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 12,
+    color: '#666',
   },
 });
 

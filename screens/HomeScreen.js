@@ -66,20 +66,8 @@ const HomeScreen = ({ navigation }) => {
     if (response === 'yes') {
       setCheckInStage('amount');
     } else {
-      handleNoDrink();
+      setCheckInStage('feeling');
     }
-  };
-
-  const handleNoDrink = async () => {
-    let newDaysClear = daysClear + 1;
-    setDaysClear(newDaysClear);
-    try {
-      await AsyncStorage.setItem('daysClear', newDaysClear.toString());
-    } catch (error) {
-      console.error('Error saving days clear:', error);
-    }
-    setCheckInStage('completed');
-    await saveJournalEntry();  // Save the journal entry after completing check-in
   };
 
   const handleDrinkAmount = () => {
@@ -90,14 +78,24 @@ const HomeScreen = ({ navigation }) => {
 
   const handleFeeling = async (feelingValue) => {
     setFeeling(feelingValue);
-    setDaysClear(0);
-    try {
-      await AsyncStorage.setItem('daysClear', '0');
-    } catch (error) {
-      console.error('Error resetting days clear:', error);
+    if (drankYesterday) {
+      setDaysClear(0);
+      try {
+        await AsyncStorage.setItem('daysClear', '0');
+      } catch (error) {
+        console.error('Error resetting days clear:', error);
+      }
+    } else {
+      let newDaysClear = daysClear + 1;
+      setDaysClear(newDaysClear);
+      try {
+        await AsyncStorage.setItem('daysClear', newDaysClear.toString());
+      } catch (error) {
+        console.error('Error saving days clear:', error);
+      }
     }
     setCheckInStage('completed');
-    await saveJournalEntry();  // Save the journal entry after completing check-in
+    await saveJournalEntry();
   };
 
   const renderFeelingOptions = () => {
@@ -133,7 +131,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const existingEntries = await AsyncStorage.getItem('journalEntries');
       let entries = existingEntries ? JSON.parse(existingEntries) : [];
-      entries.unshift(newEntry);  // Add new entry to the beginning of the array
+      entries.unshift(newEntry);
       await AsyncStorage.setItem('journalEntries', JSON.stringify(entries));
     } catch (error) {
       console.error('Error saving journal entry:', error);
