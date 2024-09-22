@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, TextInput, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { WebView } from 'react-native-webview';
 
 const HomeScreen = ({ navigation }) => {
   const [checkInCompleted, setCheckInCompleted] = useState(false);
@@ -14,6 +15,7 @@ const HomeScreen = ({ navigation }) => {
   const [feeling, setFeeling] = useState(null);
   const [checkInStage, setCheckInStage] = useState('initial'); // 'initial', 'amount', 'feeling', 'completed'
   const [drankYesterday, setDrankYesterday] = useState(null);
+  const [isSpotifyModalVisible, setIsSpotifyModalVisible] = useState(false);
 
   useEffect(() => {
     // Check if a new day has started since the last check-in
@@ -63,11 +65,7 @@ const HomeScreen = ({ navigation }) => {
 
   const handleCheckInResponse = (response) => {
     setDrankYesterday(response === 'yes');
-    if (response === 'yes') {
-      setCheckInStage('amount');
-    } else {
-      setCheckInStage('feeling');
-    }
+    setCheckInStage('feeling');
   };
 
   const handleDrinkAmount = () => {
@@ -138,6 +136,40 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const SpotifyPlayer = ({ playlistId }) => {
+    const embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
+    
+    return (
+      <WebView
+        source={{ uri: embedUrl }}
+        style={{ flex: 1 }}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        allowsFullscreenVideo={true}
+        mediaPlaybackRequiresUserAction={false}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView error: ', nativeEvent);
+        }}
+        onHttpError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn(
+            'WebView received error status code: ',
+            nativeEvent.statusCode
+          );
+        }}
+      />
+    );
+  };
+
+  const handleActivityPress = (activity) => {
+    if (activity === 'Listen to Music') {
+      setIsSpotifyModalVisible(true);
+    }
+    // Handle other activities here
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -201,7 +233,11 @@ const HomeScreen = ({ navigation }) => {
           
           <View style={styles.activitiesGrid}>
             {['Play a Game', 'Listen to Music', 'Watch Inspiration', 'Quick Exercise', 'Mindful Break', 'Quick Chat'].map((activity, index) => (
-              <TouchableOpacity key={index} style={styles.activityButton}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.activityButton}
+                onPress={() => handleActivityPress(activity)}
+              >
                 <Ionicons name={getIconName(activity)} size={24} color="#4380b4" />
                 <Text style={styles.activityButtonText}>{activity}</Text>
               </TouchableOpacity>
@@ -263,6 +299,25 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={isSpotifyModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsSpotifyModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setIsSpotifyModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+            <SpotifyPlayer playlistId="4fB0xwpz8qKQpmaKVr6NJk" />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -478,6 +533,23 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    height: 400, // Adjusted to match the iframe height plus some padding
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 10,
   },
 });
 
