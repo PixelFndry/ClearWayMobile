@@ -208,6 +208,10 @@ const HomeScreen = ({ navigation }) => {
     // You might want to navigate to a new screen or open a chat interface
   };
 
+  const handleMeditationPress = () => {
+    navigation.navigate('MeditationVideos');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -339,7 +343,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <Text style={styles.sectionTitle}>Meditation</Text>
           <Text style={styles.sectionText}>Guided meditations for peace and clarity on your ClearWay path.</Text>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleMeditationPress}>
             <Text style={styles.buttonText}>Start Meditating</Text>
           </TouchableOpacity>
         </View>

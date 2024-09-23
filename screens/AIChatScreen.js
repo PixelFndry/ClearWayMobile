@@ -2,9 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OpenAI from 'openai';
+import { OPENAI_API_KEY } from '@env';
 
 const openai = new OpenAI({
-  apiKey: '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'
+  apiKey: OPENAI_API_KEY
 });
 
 const AIChatScreen = () => {

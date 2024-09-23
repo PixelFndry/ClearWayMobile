@@ -6,6 +6,7 @@ import AIChatScreen from './screens/AIChatScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import JournalScreen from './screens/JournalScreen';
 import { useFonts, Roboto_100Thin } from '@expo-google-fonts/roboto';
+import MeditationVideosScreen from './screens/MeditationVideosScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,11 @@ export default function App() {
         <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'AI Counselor' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Journal" component={JournalScreen} />
+        <Stack.Screen 
+          name="MeditationVideos" 
+          component={MeditationVideosScreen} 
+          options={{ title: 'Guided Meditations' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
