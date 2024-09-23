@@ -3,6 +3,7 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import OpenAI from 'openai';
+import { OPENAI_API_KEY } from '@env'; // Import the API key from the .env file
 
 const AIChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -67,7 +68,7 @@ const AIChatScreen = () => {
 };
 
 const openai = new OpenAI({
-  apiKey: Constants.expoConfig.extra.openaiApiKey,
+  apiKey: process.env.OPENAI_API_KEY, // Use environment variable instead
 });
 
 const styles = StyleSheet.create({
