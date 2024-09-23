@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import { OPENAI_API_KEY } from '@env';
 
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY
+  apiKey: OPENAI_API_KEY // Use the imported environment variable
 });
 
 const AIChatScreen = () => {
