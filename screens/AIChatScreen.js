@@ -4,10 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: Constants.expoConfig.extra.openAIKey
-});
-
 const AIChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -69,6 +65,10 @@ const AIChatScreen = () => {
     </SafeAreaView>
   );
 };
+
+const openai = new OpenAI({
+  apiKey: Constants.expoConfig.extra.openaiApiKey,
+});
 
 const styles = StyleSheet.create({
   container: {

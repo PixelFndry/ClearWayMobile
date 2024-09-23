@@ -9,6 +9,8 @@ import { useFonts, Roboto_100Thin } from '@expo-google-fonts/roboto';
 import MeditationVideosScreen from './screens/MeditationVideosScreen';
 import InspirationScreen from './screens/InspirationScreen';
 import QuickExerciseScreen from './screens/QuickExerciseScreen';
+import VideoPlayerScreen from './screens/VideoPlayerScreen';
+import MindfulBreakScreen from './screens/MindfulBreakScreen';
 
 const Stack = createStackNavigator();
 
@@ -23,18 +25,17 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'AI Counselor' }} />
+        <Stack.Screen name="AIChat" component={AIChatScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Journal" component={JournalScreen} />
-        <Stack.Screen 
-          name="MeditationVideos" 
-          component={MeditationVideosScreen} 
-          options={{ title: 'Guided Meditations' }}
-        />
-        <Stack.Screen name="Inspiration" component={InspirationScreen} options={{ title: 'Daily Inspiration' }} />
+        <Stack.Screen name="MeditationVideos" component={MeditationVideosScreen} />
+        <Stack.Screen name="Inspiration" component={InspirationScreen} />
         <Stack.Screen name="QuickExercise" component={QuickExerciseScreen} />
+        <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
+        <Stack.Screen name="MindfulBreak" component={MindfulBreakScreen} />
+        {/* Add other screens as needed */}
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,20 +1,26 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const meditationVideos = [
-  { id: '1', title: 'Introduction to Meditation' },
+  { id: '1', title: 'Introduction to Meditation', url: 'https://www.youtube.com/watch?v=M0oxtg56mzs' },
   { id: '2', title: 'Breathing Techniques' },
   { id: '3', title: 'Body Scan Meditation' },
   // Add more videos as needed
 ];
 
-const MeditationVideosScreen = ({ navigation }) => {
+const MeditationVideosScreen = () => {
+  const navigation = useNavigation();
+
   const renderItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.videoItem}
       onPress={() => {
-        // Navigate to video player or start playing video
-        console.log(`Play video: ${item.title}`);
+        if (item.url) {
+          navigation.navigate('VideoPlayer', { videoUrl: item.url });
+        } else {
+          console.log(`Play video: ${item.title}`);
+        }
       }}
     >
       <Text style={styles.videoTitle}>{item.title}</Text>

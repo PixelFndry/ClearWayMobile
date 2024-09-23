@@ -1,8 +1,8 @@
-export default {
-  expo: {
-    // ... other configurations
+export default ({ config }) => {
+  return {
+    ...config,
     extra: {
-      openAIKey: process.env.OPENAI_API_KEY,
+      openaiApiKey: process.env.OPENAI_API_KEY,
     },
-  },
+  };
 };

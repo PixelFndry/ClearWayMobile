@@ -198,10 +198,12 @@ const HomeScreen = ({ navigation }) => {
       setIsSpotifyModalVisible(true);
     } else if (activity === 'Quick Chat') {
       navigation.navigate('AIChat');
-    } else if (activity === 'Watch Inspiration') {
+    } else if (activity === 'View Inspiration') {
       navigation.navigate('Inspiration');
     } else if (activity === 'Quick Exercise') {
       navigation.navigate('QuickExercise');
+    } else if (activity === 'Mindful Break') {
+      navigation.navigate('MindfulBreak');
     }
     // Handle other activities here
   };
@@ -285,7 +287,7 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
           
           <View style={styles.activitiesGrid}>
-            {['Play a Game', 'Listen to Music', 'Watch Inspiration', 'Quick Exercise', 'Mindful Break', 'Quick Chat'].map((activity, index) => (
+            {['Play a Game', 'Listen to Music', 'View Inspiration', 'Quick Exercise', 'Mindful Break', 'Quick Chat'].map((activity, index) => (
               <TouchableOpacity 
                 key={index} 
                 style={styles.activityButton}
@@ -380,7 +382,7 @@ const getIconName = (activity) => {
   const iconMap = {
     'Play a Game': 'game-controller-outline',
     'Listen to Music': 'musical-notes-outline',
-    'Watch Inspiration': 'videocam-outline',
+    'View Inspiration': 'videocam-outline',
     'Quick Exercise': 'barbell-outline',
     'Mindful Break': 'cafe-outline',
     'Quick Chat': 'chatbubble-outline',
