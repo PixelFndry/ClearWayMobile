@@ -198,6 +198,8 @@ const HomeScreen = ({ navigation }) => {
       setIsSpotifyModalVisible(true);
     } else if (activity === 'Quick Chat') {
       navigation.navigate('AIChat');
+    } else if (activity === 'Watch Inspiration') {
+      navigation.navigate('Inspiration');
     }
     // Handle other activities here
   };

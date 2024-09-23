@@ -17,6 +17,7 @@
     "@react-navigation/stack": "^6.4.1",
     "date-fns": "^4.1.0",
     "expo": "~51.0.28",
+    "expo-av": "~14.0.7",
     "expo-status-bar": "~1.12.1",
     "firebase": "^10.13.2",
     "openai": "^4.63.0",
