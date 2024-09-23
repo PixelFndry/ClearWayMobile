@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Constants from 'expo-constants';
 import OpenAI from 'openai';
-import { OPENAI_API_KEY } from '@env';
 
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY // Use the imported environment variable
+  apiKey: Constants.expoConfig.extra.openAIKey
 });
 
 const AIChatScreen = () => {

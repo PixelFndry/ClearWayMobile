@@ -8,6 +8,7 @@ import JournalScreen from './screens/JournalScreen';
 import { useFonts, Roboto_100Thin } from '@expo-google-fonts/roboto';
 import MeditationVideosScreen from './screens/MeditationVideosScreen';
 import InspirationScreen from './screens/InspirationScreen';
+import QuickExerciseScreen from './screens/QuickExerciseScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,7 @@ export default function App() {
           options={{ title: 'Guided Meditations' }}
         />
         <Stack.Screen name="Inspiration" component={InspirationScreen} options={{ title: 'Daily Inspiration' }} />
+        <Stack.Screen name="QuickExercise" component={QuickExerciseScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

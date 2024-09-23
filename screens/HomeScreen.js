@@ -200,6 +200,8 @@ const HomeScreen = ({ navigation }) => {
       navigation.navigate('AIChat');
     } else if (activity === 'Watch Inspiration') {
       navigation.navigate('Inspiration');
+    } else if (activity === 'Quick Exercise') {
+      navigation.navigate('QuickExercise');
     }
     // Handle other activities here
   };
