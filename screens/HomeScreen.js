@@ -18,6 +18,7 @@ const HomeScreen = ({ navigation }) => {
   const [checkInStage, setCheckInStage] = useState('initial'); // 'initial', 'amount', 'feeling', 'completed'
   const [drankYesterday, setDrankYesterday] = useState(null);
   const [isSpotifyModalVisible, setIsSpotifyModalVisible] = useState(false);
+  const [isSupportModalVisible, setIsSupportModalVisible] = useState(false);
 
   useEffect(() => {
     // Check if a new day has started since the last check-in
@@ -192,10 +193,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleActivityPress = (activity) => {
-    if (activity === 'Play a Game') {
-      openGrandMountainAdventure();
-    } else if (activity === 'Listen to Music') {
+    console.log('Activity pressed:', activity);
+    if (activity === 'Listen to Music') {
+      console.log('Setting Spotify modal visible');
       setIsSpotifyModalVisible(true);
+    } else if (activity === 'Play a Game') {
+      openGrandMountainAdventure();
     } else if (activity === 'Quick Chat') {
       navigation.navigate('AIChat');
     } else if (activity === 'View Inspiration') {
@@ -209,9 +212,19 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLiveSupportPress = () => {
-    // Implement the action for speaking to live support
-    console.log("Speak to Live Support pressed");
-    // You might want to navigate to a new screen or open a chat interface
+    setIsSupportModalVisible(true);
+  };
+
+  const handleSupportOption = (option) => {
+    setIsSupportModalVisible(false);
+    if (option === 'text') {
+      // Placeholder for text chat functionality
+      alert('Text chat selected. Implement your chat service here.');
+    } else if (option === 'phone') {
+      // Replace with the phone number for live support
+      const phoneNumber = 'tel:+1234567890';
+      Linking.openURL(phoneNumber);
+    }
   };
 
   const handleMeditationPress = () => {
@@ -369,7 +382,39 @@ const HomeScreen = ({ navigation }) => {
             >
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
+            <Text style={styles.modalTitle}>Spotify Player</Text>
             <SpotifyPlayer playlistId="4fB0xwpz8qKQpmaKVr6NJk" />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={isSupportModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsSupportModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setIsSupportModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Choose Support Option</Text>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => handleSupportOption('text')}
+            >
+              <Text style={styles.modalButtonText}>Text Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => handleSupportOption('phone')}
+            >
+              <Text style={styles.modalButtonText}>Phone Call</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -600,11 +645,32 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     width: '90%',
-    height: 400, // Adjusted to match the iframe height plus some padding
+    height: '80%',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#4380b4',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+    width: '100%',
+  },
+  modalButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   closeButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   liveSupportButton: {
     backgroundColor: '#4380b4',

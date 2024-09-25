@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 
 const meditationVideos = [
   { id: '1', title: 'Introduction to Meditation', url: 'https://www.youtube.com/watch?v=M0oxtg56mzs' },
-  { id: '2', title: 'Breathing Techniques' },
-  { id: '3', title: 'Body Scan Meditation' },
+  { id: '2', title: 'Breathing Techniques', url: 'https://www.youtube.com/watch?v=NGHmWIEGSoM' },
+  { id: '3', title: 'Body Scan Meditation', url: 'https://www.youtube.com/watch?v=ic31bfDFPv0' },
   // Add more videos as needed
 ];
 

@@ -2,8 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
-import OpenAI from 'openai';
-import { OPENAI_API_KEY } from '@env'; // Import the API key from the .env file
+import { OPENAI_API_KEY } from '@env';
 
 const AIChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -17,20 +16,33 @@ const AIChatScreen = () => {
     setInputText('');
 
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: "You are a helpful AI counselor." },
-          { role: "user", content: inputText }
-        ],
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful AI counselor." },
+            { role: "user", content: inputText }
+          ],
+        })
       });
 
-      const aiResponse = { 
-        id: Date.now() + 1, 
-        text: response.choices[0].message.content.trim(), 
-        user: false 
-      };
-      setMessages(prevMessages => [...prevMessages, aiResponse]);
+      const data = await response.json();
+      
+      if (data.choices && data.choices.length > 0) {
+        const aiResponse = { 
+          id: Date.now() + 1, 
+          text: data.choices[0].message.content.trim(), 
+          user: false 
+        };
+        setMessages(prevMessages => [...prevMessages, aiResponse]);
+      } else {
+        console.error('Unexpected response structure:', data);
+      }
     } catch (error) {
       console.error('Error getting AI response:', error);
       // Handle error (e.g., show an error message to the user)
@@ -66,10 +78,6 @@ const AIChatScreen = () => {
     </SafeAreaView>
   );
 };
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Use environment variable instead
-});
 
 const styles = StyleSheet.create({
   container: {

@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Video } from 'expo-av';
+import { WebView } from 'react-native-webview';
 
 const InspirationScreen = () => {
   const [quote, setQuote] = useState('');
-  const [videoUri, setVideoUri] = useState('');
+  const [videoId, setVideoId] = useState('JuU5_mlPy50');
 
   useEffect(() => {
-    // Fetch a random quote and video URI here
-    fetchQuoteAndVideo();
+    // Fetch a random quote here
+    fetchQuote();
   }, []);
 
-  const fetchQuoteAndVideo = async () => {
-    // This is a placeholder. You should implement actual API calls here.
+  const fetchQuote = async () => {
+    // This is a placeholder. You should implement actual API call here.
     setQuote("Believe you can and you're halfway there. - Theodore Roosevelt");
-    setVideoUri("https://example.com/inspirational-video.mp4");
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.quoteText}>{quote}</Text>
-      <Video
-        source={{ uri: videoUri }}
-        rate={1.0}
-        volume={1.0}
-        isMuted={false}
-        resizeMode="cover"
-        shouldPlay
-        isLooping
+      <WebView
         style={styles.video}
+        javaScriptEnabled={true}
+        source={{
+          uri: `https://www.youtube.com/embed/${videoId}`,
+        }}
       />
-      <TouchableOpacity style={styles.button} onPress={fetchQuoteAndVideo}>
-        <Text style={styles.buttonText}>Next Inspiration</Text>
+      <TouchableOpacity style={styles.button} onPress={fetchQuote}>
+        <Text style={styles.buttonText}>Next Quote</Text>
       </TouchableOpacity>
     </View>
   );
