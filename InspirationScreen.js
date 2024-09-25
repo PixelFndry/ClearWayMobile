@@ -1,53 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { WebView } from 'react-native-webview';
 import { Video } from 'expo-av';
 
 const InspirationScreen = () => {
   const [quote, setQuote] = useState('');
-  const [videoSource, setVideoSource] = useState({ type: 'youtube', id: 'JuU5_mlPy50' });
+  const [videoUri, setVideoUri] = useState('');
 
   useEffect(() => {
-    // Fetch a random quote and video source here
+    // Fetch a random quote and video URI here
     fetchQuoteAndVideo();
   }, []);
 
   const fetchQuoteAndVideo = async () => {
     // This is a placeholder. You should implement actual API calls here.
     setQuote("Believe you can and you're halfway there. - Theodore Roosevelt");
-    
-    // Randomly choose between YouTube and direct video
-    const isYouTube = Math.random() > 0.5;
-    if (isYouTube) {
-      setVideoSource({ type: 'youtube', id: 'JuU5_mlPy50' }); // Replace with actual YouTube ID
-    } else {
-      setVideoSource({ type: 'uri', uri: "https://example.com/inspirational-video.mp4" });
-    }
+    setVideoUri("https://example.com/inspirational-video.mp4");
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.quoteText}>{quote}</Text>
-      {videoSource.type === 'youtube' ? (
-        <WebView
-          style={styles.video}
-          javaScriptEnabled={true}
-          source={{
-            uri: `https://www.youtube.com/embed/${videoSource.id}`,
-          }}
-        />
-      ) : (
-        <Video
-          source={{ uri: videoSource.uri }}
-          rate={1.0}
-          volume={1.0}
-          isMuted={false}
-          resizeMode="cover"
-          shouldPlay
-          isLooping
-          style={styles.video}
-        />
-      )}
+      <Video
+        source={{ uri: videoUri }}
+        rate={1.0}
+        volume={1.0}
+        isMuted={false}
+        resizeMode="cover"
+        shouldPlay
+        isLooping
+        style={styles.video}
+      />
       <TouchableOpacity style={styles.button} onPress={fetchQuoteAndVideo}>
         <Text style={styles.buttonText}>Next Inspiration</Text>
       </TouchableOpacity>
